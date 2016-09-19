@@ -46,7 +46,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         Log.i("Lifecycle", "onCreate()");
 
-        // Check if there is a savedInstance created
+        // Check if there is a savedInstance
         if (savedInstanceState != null) {
             // Restore value of members from saved state
             points = savedInstanceState.getInt(POINTS_STATE);
@@ -90,10 +90,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     protected void shuffleButtonGraphics() {
