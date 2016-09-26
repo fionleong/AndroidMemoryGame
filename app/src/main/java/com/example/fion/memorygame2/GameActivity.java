@@ -1,24 +1,26 @@
 package com.example.fion.memorygame2;
 
+import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.nfc.Tag;
+
 import android.os.Handler;
-import android.os.PersistableBundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.SharedPreferencesCompat;
+
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
+
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 
 import java.util.Random;
 
@@ -38,7 +40,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     private int points = 0;
 
+    private boolean gameInProgress = false;
+
     private static final String POINTS_STATE = "points_state";
+
+
 
 
     @Override
@@ -53,7 +59,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         setContentView(R.layout.activity_game);
-
         GridLayout gridLayout = (GridLayout) findViewById(R.id.gridLayout4x4);
 
         int numCol = gridLayout.getColumnCount();
@@ -90,7 +95,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+
     }
+
 
     protected void shuffleButtonGraphics() {
 
@@ -100,8 +107,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             buttonGraphicLocation[i] = i % (numberOfElements / 2);
         }
 
-        for (int i = 0; i < numberOfElements; i++)
-        {
+        for (int i = 0; i < numberOfElements; i++) {
             int temp = buttonGraphicLocation[i];
 
             int swapIndex = random.nextInt(20);
@@ -112,8 +118,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public void resetGame() {
+        if (points != 0) {
+            points = 0;
+        }
+        this.recreate();
+    }
+
     @Override
     public void onClick(View view) {
+        gameInProgress = true;
+
+
 
         if (isBusy) {
             return;
@@ -121,12 +137,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         MemoryButton button = (MemoryButton) view;
 
+        ObjectAnimator animation = ObjectAnimator.ofFloat(button, "rotationY", 0.0f, 180f);
+        animation.setDuration(1000);
+        //animation.setRepeatCount();
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.start();
+
         if (button.isMatched) {
             return;
         }
 
         if (selectedButton1 == null) {
             selectedButton1 = button;
+
             selectedButton1.flip();
             return;
         }
@@ -154,9 +177,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 
             return;
-        }
-        else
-        {
+        } else {
             selectedButton2 = button;
             selectedButton2.flip();
             isBusy = true;
@@ -172,7 +193,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     selectedButton2 = null;
                     isBusy = false;
                 }
-            }, 500);
+            }, 1400);
 
         }
     }
@@ -193,6 +214,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
+        if (gameInProgress == true)
+        {
+            askUser();
+        }
         Log.i("Lifecycle", "onResume()");
     }
 
@@ -239,5 +264,27 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "You've won! ", Toast.LENGTH_LONG).show();
         }
     }
+
+    public void askUser() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setPositiveButton("New Game", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked New Game button
+                dialog.cancel();
+                resetGame();
+
+            }
+        });
+        builder.setNegativeButton("Resume", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked Resume dialog
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+
 }
+
 
