@@ -61,4 +61,5 @@
         android:layout_alignStart="@+id/playButton"
         android:onClick="openRules" />
 
+
 </LinearLayout>

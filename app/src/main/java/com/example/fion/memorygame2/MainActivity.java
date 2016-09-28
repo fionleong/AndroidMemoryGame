@@ -1,10 +1,14 @@
 package com.example.fion.memorygame2;
 
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import static android.app.DialogFragment.STYLE_NORMAL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,8 +34,10 @@ public class MainActivity extends AppCompatActivity {
         rulesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, Rules.class);
-                startActivity(intent);
+                FragmentManager fm = getSupportFragmentManager();
+                RuleFragment rf = new RuleFragment();
+                rf.setStyle(STYLE_NORMAL, R.style.Dialog_FullScreen);
+                rf.show(fm, "Rules Fragment");
             }
         });
 

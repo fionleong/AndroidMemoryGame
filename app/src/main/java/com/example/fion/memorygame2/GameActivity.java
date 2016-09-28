@@ -4,19 +4,31 @@ import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.os.Build;
 import android.os.Handler;
 
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.GridLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 import com.daimajia.androidanimations.library.Techniques;
@@ -42,10 +54,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     private boolean gameInProgress = false;
 
+    @BindView(R.id.expandButton)
+    ImageButton expandButton;
+
     private static final String POINTS_STATE = "points_state";
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +69,40 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             // Restore value of members from saved state
             points = savedInstanceState.getInt(POINTS_STATE);
         }
-
         setContentView(R.layout.activity_game);
+        ButterKnife.bind(this);
+        expandButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(GameActivity.this, expandButton);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater().inflate(R.menu.menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.startOver:
+                                resetGame();
+                                return true;
+
+                            case R.id.shuffleCards:
+                                shuffleCurrentGameGraphics();
+                                return true;
+
+                        }
+                        return true;
+                    }
+
+                });
+
+                popup.show();//showing popup menu
+            }
+        });//closing the setOnClickListener method
+
+
         GridLayout gridLayout = (GridLayout) findViewById(R.id.gridLayout4x4);
 
         int numCol = gridLayout.getColumnCount();
@@ -98,7 +142,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
     protected void shuffleButtonGraphics() {
 
         Random random = new Random();
@@ -118,6 +161,29 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    protected void shuffleCurrentGameGraphics()
+    {
+        for (int i = 0; i < buttons.length; i++)
+        {
+            if (buttons[i].isMatched())     // If it is a matched card, swap it with the first unmatched card
+            {
+                for (int j = i + 1; j < buttons.length; j++)
+                {
+                    if (buttons[j].isMatched() == false)
+                    {
+                        MemoryButton temp = buttons[i];
+
+                        buttons[i] = buttons[j];
+
+                        buttons[j] = temp;
+
+                    }
+                }
+            }
+        }
+
+    }
+
     public void resetGame() {
         if (points != 0) {
             points = 0;
@@ -129,24 +195,25 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         gameInProgress = true;
 
-
-
         if (isBusy) {
             return;
         }
 
         MemoryButton button = (MemoryButton) view;
 
+        // Animation of the flipping cards
         ObjectAnimator animation = ObjectAnimator.ofFloat(button, "rotationY", 0.0f, 180f);
         animation.setDuration(1000);
         //animation.setRepeatCount();
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.start();
 
+        // If the buttons are already matched, do nothing
         if (button.isMatched) {
             return;
         }
 
+        // if this is the first button user clicked, flip it
         if (selectedButton1 == null) {
             selectedButton1 = button;
 
@@ -154,11 +221,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
+
         if (selectedButton1.getId() == button.getId()) {
 
             return;
         }
 
+        // If both of the im
         if (selectedButton1.getFrontDrawableId() == button.getFrontDrawableId()) {
             button.flip();
 
@@ -177,7 +246,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 
             return;
-        } else {
+
+        }
+        else
+        {
             selectedButton2 = button;
             selectedButton2.flip();
             isBusy = true;
@@ -214,8 +286,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        if (gameInProgress == true)
-        {
+        if (gameInProgress == true) {
             askUser();
         }
         Log.i("Lifecycle", "onResume()");
@@ -250,6 +321,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("Lifecycle", "Restore Instance State");
     }
 
+    // Override the backpress button to disable the activity from being destroyed
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(GameActivity.this, MainActivity.class);
@@ -259,12 +331,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("Lifecycle", "Back Button Pressed");
     }
 
+    // Check the current points in game
     public void checkPoints() {
         if (points == 10) {
             Toast.makeText(this, "You've won! ", Toast.LENGTH_LONG).show();
+            askUser();
         }
     }
 
+    // Ask user if they want to resume or start new game
     public void askUser() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton("New Game", new DialogInterface.OnClickListener() {
@@ -272,7 +347,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 // User clicked New Game button
                 dialog.cancel();
                 resetGame();
-
             }
         });
         builder.setNegativeButton("Resume", new DialogInterface.OnClickListener() {
@@ -283,8 +357,4 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         });
         builder.show();
     }
-
-
 }
-
-
