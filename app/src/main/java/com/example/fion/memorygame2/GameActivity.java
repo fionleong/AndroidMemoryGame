@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 
@@ -51,11 +52,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isBusy = false;
 
     private int points = 0;
-
     private boolean gameInProgress = false;
 
     @BindView(R.id.expandButton)
     ImageButton expandButton;
+
+    @BindView(R.id.gridLayout)
+    GridLayout gridLayout;
 
     private static final String POINTS_STATE = "points_state";
 
@@ -71,6 +74,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
         setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
+
+        // Creating the popup menu
         expandButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -92,18 +97,20 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                                 shuffleCurrentGameGraphics();
                                 return true;
 
+                            case R.id.showAll:
+                                showAll();
+                                return true;
+
+                            case R.id.closeAll:
+                                closeAll();
+                                return true;
                         }
                         return true;
                     }
-
                 });
-
-                popup.show();//showing popup menu
+                popup.show();
             }
-        });//closing the setOnClickListener method
-
-
-        GridLayout gridLayout = (GridLayout) findViewById(R.id.gridLayout4x4);
+        });
 
         int numCol = gridLayout.getColumnCount();
         int numRow = gridLayout.getRowCount();
@@ -138,8 +145,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 gridLayout.addView(tempButton);
             }
         }
-
-
     }
 
     protected void shuffleButtonGraphics() {
@@ -161,27 +166,45 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    protected void shuffleCurrentGameGraphics()
-    {
-        for (int i = 0; i < buttons.length; i++)
-        {
-            if (buttons[i].isMatched())     // If it is a matched card, swap it with the first unmatched card
+    protected void shuffleCurrentGameGraphics() {
+        for (int i = 0; i < buttons.length; i++) {
+            buttons[i].setOnClickListener(this);
+
+            if (buttons[i].isMatched() && buttons[i].getVisibility() != View.INVISIBLE)
             {
-                for (int j = i + 1; j < buttons.length; j++)
-                {
-                    if (buttons[j].isMatched() == false)
-                    {
-                        MemoryButton temp = buttons[i];
+                //set all the isMatched buttons to invisible
+                buttons[i].setVisibility(View.INVISIBLE);
 
-                        buttons[i] = buttons[j];
+                // Swap button[i] with the next button that is not matched and not invisible
+                for (int j = i + 1; j < buttons.length; j++) {
+                    if (buttons[j].getVisibility() != View.INVISIBLE) {
+                        float tempX = buttons[i].getX();
+                        float tempY = buttons[i].getY();
 
-                        buttons[j] = temp;
+                        buttons[i].setX(buttons[j].getX());
+                        buttons[i].setY(buttons[j].getY());
 
+                        buttons[j].setX(tempX);
+                        buttons[j].setY(tempY);
                     }
                 }
             }
         }
+    }
 
+    public void showAll() {
+        for (int i = 0; i < buttons.length; i++) {
+            buttons[i].flip();
+            buttons[i].setFlipped(true);
+        }
+    }
+
+    public void closeAll() {
+        for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i].isFlipped()) {
+                buttons[i].flip();
+            }
+        }
     }
 
     public void resetGame() {
@@ -204,12 +227,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         // Animation of the flipping cards
         ObjectAnimator animation = ObjectAnimator.ofFloat(button, "rotationY", 0.0f, 180f);
         animation.setDuration(1000);
+
         //animation.setRepeatCount();
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.start();
 
         // If the buttons are already matched, do nothing
         if (button.isMatched) {
+
             return;
         }
 
@@ -227,14 +252,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-        // If both of the im
-        if (selectedButton1.getFrontDrawableId() == button.getFrontDrawableId()) {
+        // If both of the images are the same
+        if ((selectedButton1.getFrontDrawableId() == button.getFrontDrawableId()) || (selectedButton1.getFront() == button.getFront())) {
             button.flip();
 
             button.setMatched(true);
             selectedButton1.setMatched(true);
 
-            selectedButton1.setEnabled(false); // disable the button
+            selectedButton1.setEnabled(false); // button cannot be clicked
             button.setEnabled(false);
 
             selectedButton1 = null;
@@ -244,12 +269,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             TextView pointsText = (TextView) findViewById(R.id.pointsText);
             pointsText.setText("Points: " + points);
 
-
             return;
 
-        }
-        else
-        {
+        } else {
             selectedButton2 = button;
             selectedButton2.flip();
             isBusy = true;
@@ -355,6 +377,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 dialog.cancel();
             }
         });
+
         builder.show();
     }
 }

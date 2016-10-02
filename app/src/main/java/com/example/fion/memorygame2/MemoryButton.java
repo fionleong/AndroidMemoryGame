@@ -12,11 +12,12 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
 
-public class MemoryButton extends Button implements Animation.AnimationListener{
+public class MemoryButton extends Button implements Animation.AnimationListener {
 
     protected int row, col, frontDrawableId;
     protected boolean isFlipped = false;
     protected boolean isMatched = false;
+    protected boolean isChecked = false;
 
     protected Drawable front;
     protected Drawable back;
@@ -25,8 +26,7 @@ public class MemoryButton extends Button implements Animation.AnimationListener{
     private Animation animation2;
     private boolean isBackOfCardShowing = true;
 
-    public MemoryButton(Context context, int r, int c, int frontImageDrawableId)
-    {
+    public MemoryButton(Context context, int r, int c, int frontImageDrawableId) {
         super(context);
         row = r;
         col = c;
@@ -46,10 +46,26 @@ public class MemoryButton extends Button implements Animation.AnimationListener{
         tempParams.rightMargin = 15;
 
 
-
         setLayoutParams(tempParams);
 
 
+    }
+
+
+    public void setFrontDrawableId(int frontDrawableId) {
+        this.frontDrawableId = frontDrawableId;
+    }
+
+    public int getFrontDrawableId() {
+        return frontDrawableId;
+    }
+
+    public Drawable getFront() {
+        return front;
+    }
+
+    public void setFront(Drawable front) {
+        this.front = front;
     }
 
     public boolean isMatched() {
@@ -60,37 +76,39 @@ public class MemoryButton extends Button implements Animation.AnimationListener{
         isMatched = matched;
     }
 
-    public int getFrontDrawableId() {
-        return frontDrawableId;
-    }
-
-    public void flip()
-    {
-//        animation1 = AnimationUtils.loadAnimation(this, R.anim.to_middle);
-//        animation1.setAnimationListener(this);
-//        animation2 = AnimationUtils.loadAnimation(this, R.anim.from_middle);
-//        animation2.setAnimationListener(this);
-//
-//        button.clearAnimation();
-//        button.setAnimation(animation1);
-//        button.startAnimation(animation1);
+    public void flip() {
 
         if (isMatched)
             return;
 
-        if (isFlipped)
-        {
+        if (isFlipped) {
             setBackground(back);
             isFlipped = false;
-        }
-        else
-        {
+        } else {
             setBackground(front);
             isFlipped = true;
         }
     }
+    public void setChecked(boolean checked)
+    {
+        isChecked = checked;
+    }
 
-    @Override
+    public boolean isChecked()
+    {
+        return isChecked;
+    }
+
+    public  void setFlipped(boolean flipped)
+    {
+        isFlipped = flipped;
+    }
+
+    public boolean isFlipped()
+    {
+        return isFlipped;
+    }
+
     public void onAnimationStart(Animation animation) {
 
     }
@@ -98,10 +116,8 @@ public class MemoryButton extends Button implements Animation.AnimationListener{
     @Override
     public void onAnimationEnd(Animation animation) {
 
-        if (animation == animation1)
-        {
-            if (isBackOfCardShowing)
-            {
+        if (animation == animation1) {
+            if (isBackOfCardShowing) {
                 //selectedButton1.setBackground(front);
             }
         }

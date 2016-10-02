@@ -9,4 +9,12 @@
     <item
         android:id="@+id/shuffleCards"
         android:title="Shuffle Cards" />
+
+    <item
+        android:id="@+id/showAll"
+        android:title="Show All" />
+
+    <item
+        android:id="@+id/closeAll"
+        android:title="Close All" />
 </menu>

@@ -6,7 +6,8 @@
     tools:context="com.example.fion.memorygame2.RuleFragment"
     android:gravity="center_horizontal"
     android:padding="25dp"
-    android:isScrollContainer="true">
+    android:isScrollContainer="true"
+    android:weightSum="1">
 
     <ImageButton
 
@@ -17,17 +18,23 @@
         android:background="@android:color/transparent"
         android:layout_gravity="right" />
 
-    <TextView
+    <FrameLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="RULES of the GAME"
-        android:id="@+id/textView4"
-        android:textSize="30dp"
-        android:textColor="#000000"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:padding="15dp" />
+        android:layout_height="43dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="76dp"
+            android:layout_gravity="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="RULES of the GAME"
+            android:id="@+id/textView4"
+            android:textSize="30dp"
+            android:textColor="#000000"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:padding="15dp" />
+    </FrameLayout>
 
     <TextView
         android:layout_width="wrap_content"
